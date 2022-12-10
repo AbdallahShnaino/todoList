@@ -1,10 +1,7 @@
-import {
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { DuplicatedEmailException } from 'src/errors/duplicated-email.exception';
+import { RemoveFailedException } from 'src/errors/remove-failed.exception';
+import { UpdateFailedException } from 'src/errors/update-failed.exception';
 import { Task } from './task.entity';
 
 @Injectable()
@@ -68,7 +65,7 @@ export class TasksService {
       if (updateStatus[0] > 0) {
         return updatedTaskEntity;
       } else {
-        throw new InternalServerErrorException();
+        throw new UpdateFailedException();
       }
     } catch (error) {
       throw new DuplicatedEmailException();
@@ -86,7 +83,7 @@ export class TasksService {
     if (status > 0) {
       return task;
     } else {
-      throw new InternalServerErrorException();
+      throw new RemoveFailedException();
     }
   }
 }

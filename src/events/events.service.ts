@@ -1,12 +1,13 @@
 import {
   Inject,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { DuplicatedEmailException } from 'src/errors/duplicated-email.exception';
 import { GroupeJoiningException } from 'src/errors/groupe-joining.exception';
+import { RemoveFailedException } from 'src/errors/remove-failed.exception';
+import { UpdateFailedException } from 'src/errors/update-failed.exception';
 import { CreateEventDto } from './dtos/create-event.dto';
 import { EventGroup } from './event-group.entity';
 import { Event } from './event.entity';
@@ -103,7 +104,7 @@ export class EventsService {
       if (updateStatus[0] > 0) {
         return updatedEventEntity;
       } else {
-        throw new InternalServerErrorException();
+        throw new UpdateFailedException();
       }
     } catch (error) {
       throw new DuplicatedEmailException();
@@ -121,7 +122,7 @@ export class EventsService {
     if (status > 0) {
       return event;
     } else {
-      throw new InternalServerErrorException();
+      throw new RemoveFailedException();
     }
   }
 
