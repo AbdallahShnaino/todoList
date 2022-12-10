@@ -15,10 +15,7 @@ export class AuthService {
   ) {}
 
   async signup(fullName: string, email: string, password: string) {
-    console.log('HELLO 1 ', fullName, email, password);
-
     const user = await this.usersService.findWithEmail(email);
-    console.log('HELLO 2 ', user);
     if (user) {
       throw new BadRequestException('user found before !');
     }

@@ -20,7 +20,7 @@ export class EventsService {
     private eventGroupRepository: typeof EventGroup,
   ) {}
 
-  async removeUserFromGroup(eventId: string, id: string, userId: any) {
+  async removeUserFromGroup(eventId: number, id: number, userId: any) {
     const status = await this.eventGroupRepository.destroy({
       where: {
         eventId,

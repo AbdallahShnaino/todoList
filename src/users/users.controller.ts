@@ -10,6 +10,7 @@ import {
   Patch,
   UseGuards,
   UnauthorizedException,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CurrentUser } from 'src/decorators/current-user-decorator';
 import { AuthGard } from 'src/guards/auth.guard';
@@ -35,7 +36,6 @@ export class UsersController {
     @Body() { fullName, email, password }: CreateUserDto,
     @Session() session: Record<string, any>,
   ) {
-    console.log('HELLO ', fullName, email, password);
     const user = await this.authService.signup(fullName, email, password);
     session.userId = user.id;
     return user;
@@ -48,14 +48,12 @@ export class UsersController {
   ) {
     const user = await this.authService.signin(email, password);
     session.userId = user.id;
-    console.log('route ', session);
     return user;
   }
 
   @Get('/whoami')
   @UseGuards(AuthGard)
   whoami(@CurrentUser() user: User) {
-    console.log(user);
     return user;
   }
 
@@ -70,19 +68,19 @@ export class UsersController {
   }
 
   @Get('/:id')
-  async findUserWithId(@Param('id') id: string) {
-    return await this.usersService.findWithId(parseInt(id));
+  async findUserWithId(@Param('id', ParseIntPipe) id: number) {
+    return await this.usersService.findWithId(id);
   }
 
   @Delete('/:id')
   @UseGuards(AuthGard)
   async removeUser(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Session() session: Record<string, any>,
   ) {
-    if (session.userId === parseInt(id)) {
+    if (session.userId === id) {
       session.userId = null;
-      return await this.usersService.remove(parseInt(id));
+      return await this.usersService.remove(id);
     }
     throw new UnauthorizedException();
   }
@@ -90,12 +88,12 @@ export class UsersController {
   @Patch('/:id')
   @UseGuards(AuthGard)
   async updateUser(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateUserDto,
     @Session() session: Record<string, any>,
   ) {
-    if (session.userId === parseInt(id)) {
-      return await this.usersService.update(parseInt(id), body);
+    if (session.userId === id) {
+      return await this.usersService.update(id, body);
     }
     throw new UnauthorizedException();
   }

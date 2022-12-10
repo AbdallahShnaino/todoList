@@ -47,9 +47,4 @@ export class User extends Model {
     onUpdate: 'CASCADE',
   })
   events: Event[];
-
-  /*  @OneToMany(() => Task, (task) => task.user)
-  tasks: Task[]; 
-  INSERT INTO Users (fullName,email,password) VALUES ('ali ahmed','ali@gmail.com','12654321' );
-  */
 }

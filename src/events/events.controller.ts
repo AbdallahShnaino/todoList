@@ -9,6 +9,7 @@ import {
   Query,
   Session,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { AuthGard } from 'src/guards/auth.guard';
 import { CreateEventDto } from './dtos/create-event.dto';
@@ -22,21 +23,17 @@ export class EventsController {
 
   @Post('/join')
   addUserToEvent(
-    @Param('groupId') eventId: string,
-    @Param('id') id: string,
+    @Param('groupId', ParseIntPipe) eventId: number,
+    @Param('id', ParseIntPipe) id: number,
     @Session() { userId }: Record<string, any>,
   ) {
-    return this.eventsService.joinNewUser(
-      parseInt(eventId),
-      parseInt(id),
-      userId,
-    );
+    return this.eventsService.joinNewUser(eventId, id, userId);
   }
 
   @Get('/in/:eventId/:id')
   removeUserToEvent(
-    @Param('eventId') eventId: string,
-    @Param('id') id: string,
+    @Param('eventId', ParseIntPipe) eventId: number,
+    @Param('id', ParseIntPipe) id: number,
     @Session() { userId }: Record<string, any>,
   ) {
     return this.eventsService.removeUserFromGroup(eventId, id, userId);
@@ -44,13 +41,13 @@ export class EventsController {
 
   @Get('/')
   getUserEvent(
-    @Query('id') id: string,
+    @Query('id', ParseIntPipe) id: number,
     @Session() { userId }: Record<string, any>,
   ) {
     if (!id) {
       return this.eventsService.findAll(userId);
     }
-    return this.eventsService.getEvent(parseInt(id), parseInt(userId));
+    return this.eventsService.getEvent(id, userId);
   }
 
   @Post('/')
@@ -63,18 +60,18 @@ export class EventsController {
 
   @Patch('/:id')
   updateEvent(
-    @Param('id') taskId: string,
+    @Param('id', ParseIntPipe) taskId: number,
     @Body() task: UpdateEventDto,
     @Session() { userId }: Record<string, any>,
   ) {
-    return this.eventsService.update(userId, parseInt(taskId), task);
+    return this.eventsService.update(userId, taskId, task);
   }
 
   @Delete('/:id')
   deleteEvent(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Session() { userId }: Record<string, any>,
   ) {
-    return this.eventsService.remove(parseInt(id), userId);
+    return this.eventsService.remove(id, userId);
   }
 }

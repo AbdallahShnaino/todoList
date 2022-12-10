@@ -9,6 +9,7 @@ import {
   Query,
   Session,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { AuthGard } from 'src/guards/auth.guard';
 import { CreateTaskDto } from './dtos/create-task.dto';
@@ -21,13 +22,13 @@ export class TasksController {
   constructor(private tasksService: TasksService) {}
   @Get('/')
   async getUserTask(
-    @Query('id') id: string,
+    @Query('id', ParseIntPipe) id: number,
     @Session() { userId }: Record<string, any>,
   ) {
     if (!id) {
       return this.tasksService.findAll(userId);
     }
-    return this.tasksService.getTask(parseInt(id), parseInt(userId));
+    return this.tasksService.getTask(id, userId);
   }
   @Post('/')
   async createTask(
@@ -43,17 +44,17 @@ export class TasksController {
   }
   @Patch('/:id')
   async updateTask(
-    @Param('id') taskId: string,
+    @Param('id', ParseIntPipe) taskId: number,
     @Body() task: UpdateTaskDto,
     @Session() { userId }: Record<string, any>,
   ) {
-    return this.tasksService.update(userId, parseInt(taskId), task);
+    return this.tasksService.update(userId, taskId, task);
   }
   @Delete('/:id')
   async deleteTask(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Session() { userId }: Record<string, any>,
   ) {
-    return this.tasksService.remove(parseInt(id), userId);
+    return this.tasksService.remove(id, userId);
   }
 }
