@@ -20,7 +20,7 @@ import { TasksService } from './tasks.service';
 export class TasksController {
   constructor(private tasksService: TasksService) {}
   @Get('/')
-  getUserTask(
+  async getUserTask(
     @Query('id') id: string,
     @Session() { userId }: Record<string, any>,
   ) {
@@ -30,7 +30,7 @@ export class TasksController {
     return this.tasksService.getTask(parseInt(id), parseInt(userId));
   }
   @Post('/')
-  createTask(
+  async createTask(
     @Body() { title, description, determinedAt }: CreateTaskDto,
     @Session() { userId }: Record<string, any>,
   ) {
@@ -42,7 +42,7 @@ export class TasksController {
     );
   }
   @Patch('/:id')
-  updateTask(
+  async updateTask(
     @Param('id') taskId: string,
     @Body() task: UpdateTaskDto,
     @Session() { userId }: Record<string, any>,
@@ -50,7 +50,7 @@ export class TasksController {
     return this.tasksService.update(userId, parseInt(taskId), task);
   }
   @Delete('/:id')
-  deleteTask(
+  async deleteTask(
     @Param('id') id: string,
     @Session() { userId }: Record<string, any>,
   ) {
