@@ -21,13 +21,13 @@ export class TasksController {
   constructor(private tasksService: TasksService) {}
   @Get('/')
   async getUserTask(
-    @Query('id', ParseIntPipe) id: number,
     @Session() { userId }: Record<string, any>,
+    @Query('id') id: string,
   ) {
     if (!id) {
-      return this.tasksService.findAll(userId);
+      return this.tasksService.findAllTasks(userId);
     }
-    return this.tasksService.getTask(id, userId);
+    return this.tasksService.getTask(parseInt(id), userId);
   }
   @Post('/')
   async createTask(
@@ -55,5 +55,10 @@ export class TasksController {
     @Session() { userId }: Record<string, any>,
   ) {
     return this.tasksService.remove(id, userId);
+  }
+
+  @Get('/all')
+  async getAllUsers() {
+    // return await this.tasksService.findAll();
   }
 }

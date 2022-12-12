@@ -4,13 +4,12 @@ import {
   Model,
   BelongsTo,
   ForeignKey,
-  PrimaryKey,
   DataType,
 } from 'sequelize-typescript';
 import { User } from 'src/users/user.entity';
 import { Event } from './event.entity';
 
-@Table({ tableName: 'EventGroup' })
+@Table({ tableName: 'EventGroup', timestamps: false })
 export class EventGroup extends Model {
   @ForeignKey(() => User)
   @Column({ type: DataType.INTEGER })
@@ -30,7 +29,6 @@ export class EventGroup extends Model {
   event: Event;
 
   @ForeignKey(() => User)
-  @PrimaryKey
   @Column({ type: DataType.INTEGER })
   ownerId: number;
 

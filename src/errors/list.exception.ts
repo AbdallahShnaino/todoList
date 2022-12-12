@@ -10,6 +10,7 @@ export enum Message {
   TaskNotFoundOrUnAuth = 'Task not found or you are unauthorized to take this action on this task',
   EventNotFoundOrUnAuth = 'Event not found or you are unauthorized to take this action on this event',
   userOrGroupNotExist = "User is not in the group or group doesn't exist",
+  UnAbleToCreateEvent = 'Un able to create event',
 }
 export function throwCustomException(message: Message, resCode: HttpStatus) {
   throw new HttpException(message, resCode);

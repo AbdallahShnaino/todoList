@@ -18,16 +18,16 @@ export class EventsService {
     private eventGroupRepository: typeof EventGroup,
   ) {}
 
-  async removeUserFromGroup(eventId: number, id: number, userId: any) {
+  async removeUserFromGroup(eventId: number, ownerId: number, userId: any) {
     const status = await this.eventGroupRepository.destroy({
       where: {
         eventId,
-        ownerId: userId,
-        userId: id,
+        ownerId,
+        userId,
       },
     });
     if (status > 0) {
-      return { eventId, ownerId: userId, userId: id };
+      return { eventId, ownerId, userId };
     } else {
       throwCustomException(Message.userOrGroupNotExist, HttpStatus.BAD_REQUEST);
     }
@@ -35,12 +35,16 @@ export class EventsService {
 
   async joinNewUser(
     eventId: number,
-    id: number,
     userId: number,
+    ownerId: number,
   ): Promise<EventGroup> {
-    const group = await this.eventGroupRepository.findOne({
-      where: { ownerId: userId },
-    });
+    console.log(eventId, userId, ownerId);
+    const group = await this.eventGroupRepository
+      .findOne({
+        where: { ownerId },
+        attributes: ['eventId', 'userId', 'ownerId'],
+      })
+      .catch((e) => console.log(e));
 
     if (!group) {
       throwCustomException(
@@ -49,13 +53,17 @@ export class EventsService {
       );
     }
     try {
-      return await this.eventGroupRepository.create({
-        ownerId: userId,
-        role: 'member',
-        eventId,
-        userId: id,
-      });
+      return await this.eventGroupRepository.create(
+        {
+          ownerId,
+          role: 'member',
+          eventId,
+          userId,
+        },
+        { fields: ['ownerId', 'role', 'eventId', 'userId'] },
+      );
     } catch (error) {
+      console.log(error);
       throwCustomException(Message.GroupeJoining, HttpStatus.BAD_REQUEST);
     }
   }
@@ -133,12 +141,19 @@ export class EventsService {
       userId,
     });
 
-    this.eventGroupRepository.create({
-      ownerId: userId,
-      role: 'admin',
-      eventId: createdEvent.id,
-      userId,
-    });
+    try {
+      await this.eventGroupRepository.create(
+        {
+          ownerId: userId,
+          role: 'admin',
+          eventId: createdEvent.id,
+          userId,
+        },
+        { fields: ['ownerId', 'role', 'eventId', 'userId'] },
+      );
+    } catch (error) {
+      throwCustomException(Message.UnAbleToCreateEvent, HttpStatus.CONFLICT);
+    }
 
     return createdEvent;
   }

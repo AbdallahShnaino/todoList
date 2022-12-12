@@ -14,8 +14,14 @@ export class TasksService {
     private tasksRepository: typeof Task,
   ) {}
 
-  async findAll(userId: number): Promise<Task[]> {
-    return this.tasksRepository.findAll<Task>({ where: { userId } });
+  async getUserTasks(): Promise<Task[]> {
+    return this.tasksRepository.findAll<Task>();
+  }
+
+  async findAllTasks(userId: number): Promise<Task[]> {
+    return this.tasksRepository.findAll<Task>({
+      where: { userId },
+    });
   }
 
   async getTask(id: number, userId: number): Promise<Task> {

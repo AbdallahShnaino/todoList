@@ -20,33 +20,33 @@ import { EventsService } from './events.service';
 export class EventsController {
   constructor(private eventsService: EventsService) {}
 
-  @Post('/join')
+  @Get('/join/:eventId/:userId')
   addUserToEvent(
-    @Param('groupId', ParseIntPipe) eventId: number,
-    @Param('id', ParseIntPipe) id: number,
-    @Session() { userId }: Record<string, any>,
+    @Param('eventId', ParseIntPipe) eventId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+    @Session() { userId: ownerId }: Record<string, any>,
   ) {
-    return this.eventsService.joinNewUser(eventId, id, userId);
+    return this.eventsService.joinNewUser(eventId, userId, ownerId);
   }
 
-  @Get('/in/:eventId/:id')
+  @Get('/out/:eventId/:userId')
   removeUserToEvent(
     @Param('eventId', ParseIntPipe) eventId: number,
-    @Param('id', ParseIntPipe) id: number,
-    @Session() { userId }: Record<string, any>,
+    @Param('userId', ParseIntPipe) userId: number,
+    @Session() { userId: ownerId }: Record<string, any>,
   ) {
-    return this.eventsService.removeUserFromGroup(eventId, id, userId);
+    return this.eventsService.removeUserFromGroup(eventId, ownerId, userId);
   }
 
   @Get('/')
   getUserEvent(
-    @Query('id', ParseIntPipe) id: number,
+    @Query('id') id: string,
     @Session() { userId }: Record<string, any>,
   ) {
     if (!id) {
       return this.eventsService.findAll(userId);
     }
-    return this.eventsService.getEvent(id, userId);
+    return this.eventsService.getEvent(parseInt(id), userId);
   }
 
   @Post('/')
