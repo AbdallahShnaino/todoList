@@ -16,6 +16,7 @@ export const databaseProviders = [
         password: 'root1234',
         database: 'todoDB',
       });
+
       sequelize.addModels([User, Task, Event, EventGroup]);
       await sequelize.sync();
       return sequelize;

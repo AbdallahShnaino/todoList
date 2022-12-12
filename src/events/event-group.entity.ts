@@ -4,29 +4,26 @@ import {
   Model,
   BelongsTo,
   ForeignKey,
-  IsIn,
   PrimaryKey,
+  DataType,
 } from 'sequelize-typescript';
 import { User } from 'src/users/user.entity';
 import { Event } from './event.entity';
 
-@Table({ timestamps: false })
+@Table({ tableName: 'EventGroup' })
 export class EventGroup extends Model {
   @ForeignKey(() => User)
-  @PrimaryKey
-  @Column({ allowNull: false })
+  @Column({ type: DataType.INTEGER })
   userId: number;
-
-  @IsIn([['admin', 'member', 'assistant']])
-  @Column({ allowNull: false })
-  role: string;
 
   @BelongsTo(() => User)
   user: User;
 
+  @Column({ type: DataType.STRING(15) })
+  role: string;
+
   @ForeignKey(() => Event)
-  @PrimaryKey
-  @Column({ allowNull: false })
+  @Column({ type: DataType.INTEGER })
   eventId: number;
 
   @BelongsTo(() => Event)
@@ -34,7 +31,7 @@ export class EventGroup extends Model {
 
   @ForeignKey(() => User)
   @PrimaryKey
-  @Column({ allowNull: false })
+  @Column({ type: DataType.INTEGER })
   ownerId: number;
 
   @BelongsTo(() => User)

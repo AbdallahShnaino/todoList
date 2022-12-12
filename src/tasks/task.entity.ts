@@ -1,56 +1,31 @@
-import { addListener } from 'process';
 import {
   Table,
   Column,
   Model,
-  PrimaryKey,
-  Length,
-  AllowNull,
-  AutoIncrement,
-  BeforeUpdate,
-  BeforeCreate,
   ForeignKey,
   BelongsTo,
-  Default,
+  DataType,
 } from 'sequelize-typescript';
 import { User } from 'src/users/user.entity';
 
-@Table({ timestamps: true })
+@Table({ tableName: 'Task' })
 export class Task extends Model {
-  @PrimaryKey
-  @AutoIncrement
-  @AllowNull(false)
-  @Column
-  id: number;
-
   @ForeignKey(() => User)
-  @Column({ allowNull: false })
+  @Column({ type: DataType.INTEGER })
   userId: number;
 
   @BelongsTo(() => User)
   user: User;
 
-  @Length({ max: 50, min: 5 })
-  @Column({ allowNull: false })
+  @Column({ type: DataType.STRING(50) })
   title: string;
 
-  @Column({ type: 'text', allowNull: false })
+  @Column({ type: DataType.TEXT })
   description: string;
 
-  @Default(false)
   @Column
   status: boolean;
 
-  @Column({ type: 'timestamp', allowNull: true })
+  @Column({ type: DataType.DATE })
   determinedAt: Date;
-
-  @BeforeCreate
-  static changeDeletedAtValue(instance: User) {
-    instance.createdAt = new Date();
-  }
-
-  @BeforeUpdate
-  static changeUpdatedAtValue(instance: User) {
-    instance.updatedAt = new Date();
-  }
 }

@@ -2,63 +2,39 @@ import {
   Table,
   Column,
   Model,
-  PrimaryKey,
-  Length,
-  AllowNull,
-  AutoIncrement,
-  BeforeUpdate,
-  BeforeCreate,
+  DataType,
   BelongsTo,
   ForeignKey,
-  IsIn,
 } from 'sequelize-typescript';
 import { User } from 'src/users/user.entity';
 
-@Table({ timestamps: true })
+@Table({ tableName: 'Event' })
 export class Event extends Model {
-  @PrimaryKey
-  @AutoIncrement
-  @AllowNull(false)
-  @Column
-  id: number;
-
   @ForeignKey(() => User)
-  @Column
+  @Column(DataType.INTEGER)
   userId: number;
 
   @BelongsTo(() => User)
   user: User;
 
-  @Length({ max: 50, min: 5 })
-  @Column({ allowNull: false })
+  @Column({ type: DataType.STRING(50) })
   title: string;
 
-  @Column({ type: 'double' })
+  @Column({ type: DataType.DECIMAL })
   locLongitude: number;
 
-  @Column({ type: 'double' })
+  @Column({ type: DataType.DECIMAL })
   locLatitude: number;
 
-  @Column({ type: 'text' })
+  @Column({ type: DataType.TEXT })
   description: string;
 
-  @IsIn([['public', 'private']])
-  @Column({ type: 'varchar(8)' })
+  @Column({ type: DataType.STRING(8) })
   type: string;
 
-  @Column({ type: 'timestamp', allowNull: false })
+  @Column({ type: DataType.DATE })
   startingAt: Date;
 
-  @Column({ type: 'timestamp', allowNull: false })
+  @Column({ type: DataType.DATE })
   finishedAt: Date;
-
-  @BeforeCreate
-  static changeCreatedAtValue(instance: User) {
-    instance.createdAt = new Date();
-  }
-
-  @BeforeUpdate
-  static changeUpdatedAtValue(instance: User) {
-    instance.updatedAt = new Date();
-  }
 }
