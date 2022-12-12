@@ -1,7 +1,10 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { DuplicatedEmailException } from 'src/errors/duplicated-email.exception';
-import { RemoveFailedException } from 'src/errors/remove-failed.exception';
-import { UpdateFailedException } from 'src/errors/update-failed.exception';
+import {
+  HttpStatus,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Message, throwCustomException } from 'src/errors/list.exception';
 import { Task } from './task.entity';
 
 @Injectable()
@@ -20,8 +23,9 @@ export class TasksService {
       where: { userId: userId, id: id },
     });
     if (!task) {
-      throw new NotFoundException(
-        'Task not found or you are unauthorized to update this task',
+      throwCustomException(
+        Message.TaskNotFoundOrUnAuth,
+        HttpStatus.BAD_REQUEST,
       );
     }
     return task;
@@ -49,7 +53,7 @@ export class TasksService {
     const task = await this.getTask(taskId, id);
     console.log(task);
     if (!task) {
-      throw new NotFoundException('task not found!');
+      throwCustomException(Message.UserNotFound, HttpStatus.NOT_FOUND);
     }
     const updatedTaskEntity = Object.assign(task, attrs);
 
@@ -65,17 +69,20 @@ export class TasksService {
       if (updateStatus[0] > 0) {
         return updatedTaskEntity;
       } else {
-        throw new UpdateFailedException();
+        throwCustomException(Message.UpdateFailed, HttpStatus.CONFLICT);
       }
     } catch (error) {
-      throw new DuplicatedEmailException();
+      throwCustomException(Message.DuplicatedEmail, HttpStatus.BAD_REQUEST);
     }
   }
 
   async remove(taskId: number, id: number) {
     const task = await this.getTask(taskId, id);
     if (!task) {
-      throw new NotFoundException('task not found!');
+      throwCustomException(
+        Message.TaskNotFoundOrUnAuth,
+        HttpStatus.BAD_REQUEST,
+      );
     }
     const status = await this.tasksRepository.destroy<Task>({
       where: { id: task.id },
@@ -83,7 +90,7 @@ export class TasksService {
     if (status > 0) {
       return task;
     } else {
-      throw new RemoveFailedException();
+      throwCustomException(Message.RemoveFailed, HttpStatus.BAD_REQUEST);
     }
   }
 }

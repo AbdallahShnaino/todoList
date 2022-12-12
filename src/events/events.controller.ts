@@ -13,7 +13,6 @@ import {
 } from '@nestjs/common';
 import { AuthGard } from 'src/guards/auth.guard';
 import { CreateEventDto } from './dtos/create-event.dto';
-import { UpdateEventDto } from './dtos/update-event.dto';
 import { EventsService } from './events.service';
 
 @Controller('events')
@@ -61,7 +60,7 @@ export class EventsController {
   @Patch('/:id')
   updateEvent(
     @Param('id', ParseIntPipe) taskId: number,
-    @Body() task: UpdateEventDto,
+    @Body() task: Partial<CreateEventDto>,
     @Session() { userId }: Record<string, any>,
   ) {
     return this.eventsService.update(userId, taskId, task);

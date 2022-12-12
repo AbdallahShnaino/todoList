@@ -12,7 +12,6 @@ import {
   ForeignKey,
   BelongsTo,
   Default,
-  AfterUpdate,
 } from 'sequelize-typescript';
 import { User } from 'src/users/user.entity';
 
@@ -55,7 +54,3 @@ export class Task extends Model {
     instance.updatedAt = new Date();
   }
 }
-/*
-INSERT INTO Tasks (userId,title,description) VALUES (1,'Meet ahmed','quickly!');
-
-*/

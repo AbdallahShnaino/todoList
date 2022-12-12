@@ -13,7 +13,6 @@ import {
 } from '@nestjs/common';
 import { AuthGard } from 'src/guards/auth.guard';
 import { CreateTaskDto } from './dtos/create-task.dto';
-import { UpdateTaskDto } from './dtos/update-task.dto';
 import { TasksService } from './tasks.service';
 
 @Controller('tasks')
@@ -45,7 +44,7 @@ export class TasksController {
   @Patch('/:id')
   async updateTask(
     @Param('id', ParseIntPipe) taskId: number,
-    @Body() task: UpdateTaskDto,
+    @Body() task: Partial<CreateTaskDto>,
     @Session() { userId }: Record<string, any>,
   ) {
     return this.tasksService.update(userId, taskId, task);

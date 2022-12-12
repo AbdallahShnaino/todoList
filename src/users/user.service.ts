@@ -1,10 +1,12 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { DuplicatedEmailException } from 'src/errors/duplicated-email.exception';
-import { RemoveFailedException } from 'src/errors/remove-failed.exception';
-import { UpdateFailedException } from 'src/errors/update-failed.exception';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  HttpStatus,
+} from '@nestjs/common';
 import { PasswordService } from './password.service';
 import { User } from './user.entity';
-
+import { Message, throwCustomException } from '../errors/list.exception';
 @Injectable()
 export class UsersService {
   constructor(
@@ -43,7 +45,7 @@ export class UsersService {
     if (status > 0) {
       return user;
     } else {
-      throw new RemoveFailedException();
+      throwCustomException(Message.RemoveFailed, HttpStatus.CONFLICT);
     }
   }
 
@@ -71,10 +73,10 @@ export class UsersService {
       if (updateStatus[0] > 0) {
         return updatedUserEntity;
       } else {
-        throw new UpdateFailedException();
+        throwCustomException(Message.UpdateFailed, HttpStatus.CONFLICT);
       }
     } catch (error) {
-      throw new DuplicatedEmailException();
+      throwCustomException(Message.DuplicatedEmail, HttpStatus.BAD_REQUEST);
     }
   }
 }

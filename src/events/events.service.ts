@@ -1,13 +1,11 @@
 import {
+  HttpStatus,
   Inject,
   Injectable,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { DuplicatedEmailException } from 'src/errors/duplicated-email.exception';
-import { GroupeJoiningException } from 'src/errors/groupe-joining.exception';
-import { RemoveFailedException } from 'src/errors/remove-failed.exception';
-import { UpdateFailedException } from 'src/errors/update-failed.exception';
+import { Message, throwCustomException } from 'src/errors/list.exception';
+
 import { CreateEventDto } from './dtos/create-event.dto';
 import { EventGroup } from './event-group.entity';
 import { Event } from './event.entity';
@@ -31,9 +29,7 @@ export class EventsService {
     if (status > 0) {
       return { eventId, ownerId: userId, userId: id };
     } else {
-      throw new NotFoundException(
-        "User is not in the group or group doesn't exist",
-      );
+      throwCustomException(Message.userOrGroupNotExist, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -47,8 +43,9 @@ export class EventsService {
     });
 
     if (!group) {
-      throw new NotFoundException(
-        'Group not found or you are unauthorized to add on this group',
+      throwCustomException(
+        Message.EventNotFoundOrUnAuth,
+        HttpStatus.BAD_REQUEST,
       );
     }
     try {
@@ -59,7 +56,7 @@ export class EventsService {
         userId: id,
       });
     } catch (error) {
-      throw new GroupeJoiningException();
+      throwCustomException(Message.GroupeJoining, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -68,8 +65,9 @@ export class EventsService {
       where: { userId: userId, id: id },
     });
     if (!event) {
-      throw new NotFoundException(
-        'Event not found or you are unauthorized to update this event',
+      throwCustomException(
+        Message.EventNotFoundOrUnAuth,
+        HttpStatus.BAD_REQUEST,
       );
     }
     return event;
@@ -104,17 +102,20 @@ export class EventsService {
       if (updateStatus[0] > 0) {
         return updatedEventEntity;
       } else {
-        throw new UpdateFailedException();
+        throwCustomException(Message.UpdateFailed, HttpStatus.CONFLICT);
       }
     } catch (error) {
-      throw new DuplicatedEmailException();
+      throwCustomException(Message.DuplicatedEmail, HttpStatus.BAD_REQUEST);
     }
   }
 
   async remove(taskId: number, id: number) {
     const event = await this.getEvent(taskId, id);
     if (!event) {
-      throw new NotFoundException('task not found!');
+      throwCustomException(
+        Message.EventNotFoundOrUnAuth,
+        HttpStatus.BAD_REQUEST,
+      );
     }
     const status = await this.eventsRepository.destroy<Event>({
       where: { id: event.id },
@@ -122,7 +123,7 @@ export class EventsService {
     if (status > 0) {
       return event;
     } else {
-      throw new RemoveFailedException();
+      throwCustomException(Message.RemoveFailed, HttpStatus.CONFLICT);
     }
   }
 
