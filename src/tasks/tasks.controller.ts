@@ -56,9 +56,4 @@ export class TasksController {
   ) {
     return this.tasksService.remove(id, userId);
   }
-
-  @Get('/all')
-  async getAllUsers() {
-    // return await this.tasksService.findAll();
-  }
 }
