@@ -22,7 +22,7 @@ import { ShowUserDto } from './dto/show-user.dto';
 import { SignInUserDto } from './dto/signin-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { serialize } from '../interceptors/serialize-interceptors';
-import { User } from './user.entity';
+import { User } from './schema/user.schema';
 import { UsersService } from './user.service';
 @Controller('users')
 @serialize(ShowUserDto)
@@ -68,14 +68,15 @@ export class UsersController {
   }
 
   @Get('/:id')
-  async findUserWithId(@Param('id', ParseIntPipe) id: number) {
+  async findUserWithId(@Param('id') id: string) {
+    console.log('hi', id);
     return await this.usersService.findWithId(id);
   }
 
   @Delete('/:id')
   @UseGuards(AuthGard)
   async removeUser(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id') id: string,
     @Session() session: Record<string, any>,
   ) {
     if (session.userId === id) {
@@ -88,7 +89,7 @@ export class UsersController {
   @Patch('/:id')
   @UseGuards(AuthGard)
   async updateUser(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id') id: string,
     @Body() body: UpdateUserDto,
     @Session() session: Record<string, any>,
   ) {

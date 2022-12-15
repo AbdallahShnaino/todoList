@@ -1,75 +1,77 @@
-import {
-  Injectable,
-  Inject,
-  NotFoundException,
-  HttpStatus,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, HttpStatus } from '@nestjs/common';
 import { PasswordService } from './password.service';
-import { User } from './user.entity';
 import { Message, throwCustomException } from '../errors/list.exception';
+import { UserDocument } from './schema/user.schema';
+import { User } from './interface/User.interface';
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
 @Injectable()
 export class UsersService {
   constructor(
-    @Inject('USERS_REPOSITORY')
-    private usersRepository: typeof User,
+    @InjectModel('Users') private readonly userModel: Model<User>,
     private passwordService: PasswordService,
   ) {}
 
-  createUser(fullName: string, email: string, password: string): Promise<User> {
-    return this.usersRepository.create<User>({ fullName, email, password });
+  async createUser(
+    fullName: string,
+    email: string,
+    password: string,
+  ): Promise<User> {
+    const createdUser = new this.userModel({ fullName, email, password });
+    const user = await createdUser.save();
+    console.log(user);
+    return user;
   }
 
   async findAll(): Promise<User[]> {
-    return this.usersRepository.findAll<User>();
+    return this.userModel.find().exec();
   }
 
-  findWithEmail(email: string): Promise<User> {
-    return this.usersRepository.findOne<User>({ where: { email } });
+  async findWithEmail(email: string): Promise<User> {
+    return await this.userModel.findOne({ email });
   }
 
-  findWithId(id: number): Promise<User> {
+  async findWithId(id: string): Promise<User> {
     if (!id) {
       throw new NotFoundException('user id could not be null');
     }
-    return this.usersRepository.findByPk<User>(id);
+    try {
+      return await this.userModel.findOne({ _id: id });
+    } catch (error) {
+      throw new NotFoundException('id not correct!');
+    }
   }
 
-  async remove(id: number) {
+  async remove(id: string): Promise<User> {
     const user = await this.findWithId(id);
     if (!user) {
       throw new NotFoundException('user not found!');
     }
-    const status = await this.usersRepository.destroy<User>({
-      where: { id: user.id },
-    });
-    if (status > 0) {
+    const deleteResult = await this.userModel.deleteOne({ _id: id });
+    if (deleteResult.deletedCount > 0) {
       return user;
     } else {
       throwCustomException(Message.RemoveFailed, HttpStatus.CONFLICT);
     }
   }
 
-  async update(id: number, attrs: Partial<User>): Promise<Partial<User>> {
+  async update(id: string, attrs: Partial<User>): Promise<Partial<User>> {
     const user = await this.findWithId(id);
     if (!user) {
       throw new NotFoundException('user not found!');
     }
-    const updatedUserEntity = Object.assign(user, attrs);
+    const updatedUserEntity: Partial<User> = Object.assign(user, attrs);
     if (attrs.password) {
       updatedUserEntity.password = await this.passwordService.toHash(
         attrs.password,
       );
     }
     try {
-      console.log(updatedUserEntity.dataValues);
-      const updateStatus = await this.usersRepository.update(
-        updatedUserEntity.dataValues,
-        {
-          where: {
-            id,
-          },
-        },
+      const updateStatus = await this.userModel.updateOne(
+        { _id: id },
+        updatedUserEntity,
       );
+
       if (updateStatus[0] > 0) {
         return updatedUserEntity;
       } else {

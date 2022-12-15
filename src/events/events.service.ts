@@ -7,16 +7,17 @@ import {
 import { Message, throwCustomException } from 'src/errors/list.exception';
 
 import { CreateEventDto } from './dtos/create-event.dto';
-import { EventGroup } from './event-group.entity';
-import { Event } from './event.entity';
+//import { EventGroup } from './event-group.entity';
+//import { Event } from './event.entity';
 @Injectable()
 export class EventsService {
-  constructor(
-    @Inject('EVENTS_REPOSITORY')
-    private eventsRepository: typeof Event,
-    @Inject('EVENTGROUP_REPOSITORY')
-    private eventGroupRepository: typeof EventGroup,
-  ) {}
+  constructor() // @Inject('EVENTS_REPOSITORY')
+  //  private eventsRepository: typeof Event,
+  //   @Inject('EVENTGROUP_REPOSITORY')
+  // private eventGroupRepository: typeof EventGroup,
+  {}
+  /* 
+
 
   async removeUserFromGroup(eventId: number, ownerId: number, userId: any) {
     const status = await this.eventGroupRepository.destroy({
@@ -157,4 +158,5 @@ export class EventsService {
 
     return createdEvent;
   }
+*/
 }

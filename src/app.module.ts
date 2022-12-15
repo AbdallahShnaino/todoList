@@ -1,14 +1,19 @@
 import { MiddlewareConsumer, Module, Scope } from '@nestjs/common';
-import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './users/users.module';
 import { TasksModule } from './tasks/tasks.module';
 import { EventsModule } from './events/events.module';
 import { CurrentUserMiddleware } from './users/middleware/current-user.middleware';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from './interceptors/logging.interceptor';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
-  imports: [DatabaseModule, UsersModule, TasksModule, EventsModule],
+  imports: [
+    UsersModule,
+    TasksModule,
+    EventsModule,
+    MongooseModule.forRoot('mongodb://localhost/hello'),
+  ],
   controllers: [],
   providers: [
     {

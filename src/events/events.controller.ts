@@ -26,7 +26,7 @@ export class EventsController {
     @Param('userId', ParseIntPipe) userId: number,
     @Session() { userId: ownerId }: Record<string, any>,
   ) {
-    return this.eventsService.joinNewUser(eventId, userId, ownerId);
+    // return this.eventsService.joinNewUser(eventId, userId, ownerId);
   }
 
   @Get('/out/:eventId/:userId')
@@ -35,7 +35,7 @@ export class EventsController {
     @Param('userId', ParseIntPipe) userId: number,
     @Session() { userId: ownerId }: Record<string, any>,
   ) {
-    return this.eventsService.removeUserFromGroup(eventId, ownerId, userId);
+    //  return this.eventsService.removeUserFromGroup(eventId, ownerId, userId);
   }
 
   @Get('/')
@@ -44,9 +44,9 @@ export class EventsController {
     @Session() { userId }: Record<string, any>,
   ) {
     if (!id) {
-      return this.eventsService.findAll(userId);
+      //   return this.eventsService.findAll(userId);
     }
-    return this.eventsService.getEvent(parseInt(id), userId);
+    // return this.eventsService.getEvent(parseInt(id), userId);
   }
 
   @Post('/')
@@ -54,7 +54,7 @@ export class EventsController {
     @Body() event: CreateEventDto,
     @Session() { userId }: Record<string, any>,
   ) {
-    return this.eventsService.createEvent(event, userId);
+    //  return this.eventsService.createEvent(event, userId);
   }
 
   @Patch('/:id')
@@ -63,7 +63,7 @@ export class EventsController {
     @Body() task: Partial<CreateEventDto>,
     @Session() { userId }: Record<string, any>,
   ) {
-    return this.eventsService.update(userId, taskId, task);
+    // return this.eventsService.update(userId, taskId, task);
   }
 
   @Delete('/:id')
@@ -71,6 +71,6 @@ export class EventsController {
     @Param('id', ParseIntPipe) id: number,
     @Session() { userId }: Record<string, any>,
   ) {
-    return this.eventsService.remove(id, userId);
+    //  return this.eventsService.remove(id, userId);
   }
 }

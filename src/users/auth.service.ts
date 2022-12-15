@@ -13,6 +13,7 @@ export class AuthService {
 
   async signup(fullName: string, email: string, password: string) {
     const user = await this.usersService.findWithEmail(email);
+
     if (user) {
       throwCustomException(Message.UserNotFound, HttpStatus.BAD_REQUEST);
     }

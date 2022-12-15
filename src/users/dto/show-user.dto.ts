@@ -9,10 +9,4 @@ export class ShowUserDto {
 
   @Expose()
   email: string;
-
-  @Expose()
-  createdAt: string;
-
-  @Expose()
-  updatedAt: string;
 }

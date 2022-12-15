@@ -25,21 +25,26 @@ export class TasksController {
     @Query('id') id: string,
   ) {
     if (!id) {
-      return this.tasksService.findAllTasks(userId);
+      //   return this.tasksService.findAllTasks(userId);
     }
-    return this.tasksService.getTask(parseInt(id), userId);
+    // return this.tasksService.getTask(parseInt(id), userId);
   }
   @Post('/')
   async createTask(
     @Body() { title, description, determinedAt }: CreateTaskDto,
     @Session() { userId }: Record<string, any>,
   ) {
+    /* 
+
     return this.tasksService.createTask(
       title,
       description,
       determinedAt,
       userId,
     );
+
+
+*/
   }
   @Patch('/:id')
   async updateTask(
@@ -47,13 +52,13 @@ export class TasksController {
     @Body() task: Partial<CreateTaskDto>,
     @Session() { userId }: Record<string, any>,
   ) {
-    return this.tasksService.update(userId, taskId, task);
+    //  return this.tasksService.update(userId, taskId, task);
   }
   @Delete('/:id')
   async deleteTask(
     @Param('id', ParseIntPipe) id: number,
     @Session() { userId }: Record<string, any>,
   ) {
-    return this.tasksService.remove(id, userId);
+    // return this.tasksService.remove(id, userId);
   }
 }

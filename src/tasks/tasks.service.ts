@@ -4,30 +4,26 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { Message, throwCustomException } from 'src/errors/list.exception';
-import { Task } from './task.entity';
+import { Task } from './interface/Task.interface';
 
 @Injectable()
 export class TasksService {
-  constructor(
-    @Inject('TASKS_REPOSITORY')
-    private tasksRepository: typeof Task,
-  ) {}
+  constructor(@InjectModel('Tasks') private readonly taskModel: Model<Task>) {}
 
+  
   async getUserTasks(): Promise<Task[]> {
-    return this.tasksRepository.findAll<Task>();
+    return this.taskModel.find().exec();
   }
 
-  async findAllTasks(userId: number): Promise<Task[]> {
-    return this.tasksRepository.findAll<Task>({
-      where: { userId },
-    });
+  async findAllTasks(userId: number): Promise<Task> {
+    return this.taskModel.findOne<Task>({userId})
   }
 
-  async getTask(id: number, userId: number): Promise<Task> {
-    const task = await this.tasksRepository.findOne<Task>({
-      where: { userId: userId, id: id },
-    });
+  async getTask(id: number): Promise<Task> {
+    const task = await this.taskModel.findOne<Task>({ _id: id });
     if (!task) {
       throwCustomException(
         Message.TaskNotFoundOrUnAuth,
@@ -43,7 +39,7 @@ export class TasksService {
     determinedAt: Date,
     userId: number,
   ): Promise<Task> {
-    return this.tasksRepository.create<Task>({
+    return this.taskModel.create<Task>({
       userId,
       title,
       description,
@@ -99,4 +95,6 @@ export class TasksService {
       throwCustomException(Message.RemoveFailed, HttpStatus.BAD_REQUEST);
     }
   }
+
+*/
 }

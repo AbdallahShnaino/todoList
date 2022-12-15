@@ -5,7 +5,7 @@ export enum Message {
   GroupeJoining = 'group may not exist or user has been added before!',
   RemoveFailed = 'failed to update this recourse try again',
   UpdateFailed = 'failed to update this recourse try again',
-  UserNotFound = 'user not found',
+  UserNotFound = 'user found before',
   BadPassword = 'bad password',
   TaskNotFoundOrUnAuth = 'Task not found or you are unauthorized to take this action on this task',
   EventNotFoundOrUnAuth = 'Event not found or you are unauthorized to take this action on this event',
