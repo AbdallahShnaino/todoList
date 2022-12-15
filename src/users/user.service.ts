@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException, HttpStatus } from '@nestjs/common';
 import { PasswordService } from './password.service';
 import { Message, throwCustomException } from '../errors/list.exception';
-import { UserDocument } from './schema/user.schema';
 import { User } from './interface/User.interface';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
