@@ -49,7 +49,7 @@ export class TasksController {
 
   @Patch('/:id')
   async updateTask(
-    @Param('id', ParseIntPipe) taskId: string,
+    @Param('id') taskId: string,
     @Body() task: Partial<CreateTaskDto>,
     @Session() { userId }: Record<string, any>,
   ) {

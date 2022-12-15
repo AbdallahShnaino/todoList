@@ -11,6 +11,7 @@ export enum Message {
   EventNotFoundOrUnAuth = 'Event not found or you are unauthorized to take this action on this event',
   userOrGroupNotExist = "User is not in the group or group doesn't exist",
   UnAbleToCreateEvent = 'Un able to create event',
+  GroupeExit = 'group may not exist or user has been deleted before!',
 }
 export function throwCustomException(message: Message, resCode: HttpStatus) {
   throw new HttpException(message, resCode);

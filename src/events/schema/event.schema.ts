@@ -7,19 +7,22 @@ export type EventDocument = HydratedDocument<Event>;
 @Schema()
 export class Event {
   @Prop({ required: true })
-  title: string;
-
-  @Prop({ required: false })
-  locLongitude: number;
-
-  @Prop({ required: false })
-  locLatitude: number;
+  ownerId: String;
 
   @Prop({ required: true })
-  description: string;
+  title: String;
 
   @Prop({ required: false })
-  type: string;
+  locLongitude: Number;
+
+  @Prop({ required: false })
+  locLatitude: Number;
+
+  @Prop({ required: true })
+  description: String;
+
+  @Prop({ required: false })
+  type: String;
 
   @Prop({ required: true })
   startingAt: Date;
@@ -27,8 +30,8 @@ export class Event {
   @Prop({ required: true })
   finishedAt: Date;
 
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
-  user: User[];
+  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Users' }] })
+  users: User[];
 }
 
 export const EventSchema = SchemaFactory.createForClass(Event);

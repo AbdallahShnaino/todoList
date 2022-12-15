@@ -8,17 +8,7 @@ import {
   MaxLength,
   IsDateString,
 } from 'class-validator';
-/* 
 
-
-{
-    "eventId":6,
-    "userId":6,
-    "role":"member"
-}
-
-
-*/
 export class CreateEventDto {
   @IsString()
   @MinLength(5)

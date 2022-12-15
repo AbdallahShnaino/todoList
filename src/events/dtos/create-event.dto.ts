@@ -16,17 +16,17 @@ export class CreateEventDto {
   title: string;
 
   @IsOptional()
+  @IsString()
+  @MinLength(5)
+  description: string;
+
+  @IsOptional()
   @IsLongitude()
   locLongitude: number;
 
   @IsOptional()
   @IsLatitude()
   locLatitude: number;
-
-  @IsOptional()
-  @IsString()
-  @MinLength(5)
-  description: string;
 
   @IsOptional()
   @IsString()

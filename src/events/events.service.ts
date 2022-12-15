@@ -4,75 +4,51 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import mongoose, { Model } from 'mongoose';
 import { Message, throwCustomException } from 'src/errors/list.exception';
-
+import { User } from 'src/users/interface/User.interface';
+import { UsersService } from 'src/users/user.service';
+import { ObjectID } from 'typeorm';
 import { CreateEventDto } from './dtos/create-event.dto';
-//import { EventGroup } from './event-group.entity';
-//import { Event } from './event.entity';
+import { Event } from './interface/Event.interface';
 @Injectable()
 export class EventsService {
-  constructor() // @Inject('EVENTS_REPOSITORY')
-  //  private eventsRepository: typeof Event,
-  //   @Inject('EVENTGROUP_REPOSITORY')
-  // private eventGroupRepository: typeof EventGroup,
-  {}
-  /* 
+  constructor(
+    @InjectModel('Events') private readonly eventModel: Model<Event>,
+    private readonly usersService: UsersService,
+  ) {}
 
+  async createEvent(e: CreateEventDto, ownerId: string): Promise<Event> {
+    try {
+      const createdEvent = new this.eventModel({ ...e, ownerId });
 
-  async removeUserFromGroup(eventId: number, ownerId: number, userId: any) {
-    const status = await this.eventGroupRepository.destroy({
-      where: {
-        eventId,
-        ownerId,
-        userId,
-      },
-    });
-    if (status > 0) {
-      return { eventId, ownerId, userId };
-    } else {
-      throwCustomException(Message.userOrGroupNotExist, HttpStatus.BAD_REQUEST);
+      const event = await createdEvent.save();
+      return event;
+    } catch (error) {
+      throwCustomException(Message.UnAbleToCreateEvent, HttpStatus.CONFLICT);
     }
   }
 
-  async joinNewUser(
-    eventId: number,
-    userId: number,
-    ownerId: number,
-  ): Promise<EventGroup> {
-    console.log(eventId, userId, ownerId);
-    const group = await this.eventGroupRepository
-      .findOne({
-        where: { ownerId },
-        attributes: ['eventId', 'userId', 'ownerId'],
-      })
-      .catch((e) => console.log(e));
-
-    if (!group) {
+  async remove(eventId: string, ownerId: string) {
+    const event = await this.getEvent(eventId, ownerId);
+    if (!event) {
       throwCustomException(
         Message.EventNotFoundOrUnAuth,
         HttpStatus.BAD_REQUEST,
       );
     }
-    try {
-      return await this.eventGroupRepository.create(
-        {
-          ownerId,
-          role: 'member',
-          eventId,
-          userId,
-        },
-        { fields: ['ownerId', 'role', 'eventId', 'userId'] },
-      );
-    } catch (error) {
-      console.log(error);
-      throwCustomException(Message.GroupeJoining, HttpStatus.BAD_REQUEST);
+    const status = await this.eventModel.deleteOne({ _id: eventId });
+    if (status.deletedCount > 0) {
+      return event;
+    } else {
+      throwCustomException(Message.RemoveFailed, HttpStatus.CONFLICT);
     }
   }
 
-  async getEvent(id: number, userId: number): Promise<Event> {
-    const event = await this.eventsRepository.findOne<Event>({
-      where: { userId: userId, id: id },
-    });
+  async getEvent(id: string, ownerId: string): Promise<Event> {
+    const event = this.eventModel.findOne<Event>({ ownerId, _id: id });
+
     if (!event) {
       throwCustomException(
         Message.EventNotFoundOrUnAuth,
@@ -83,12 +59,12 @@ export class EventsService {
   }
 
   async findAll(userId: number): Promise<Event[]> {
-    return this.eventsRepository.findAll<Event>({ where: { userId } });
+    return this.eventModel.find({ userId });
   }
 
   async update(
-    id: number,
-    eventId: number,
+    id: string,
+    eventId: string,
     attrs: Partial<Event>,
   ): Promise<Partial<Event>> {
     const task = await this.getEvent(eventId, id);
@@ -100,15 +76,11 @@ export class EventsService {
     const updatedEventEntity = Object.assign(task, attrs);
 
     try {
-      const updateStatus = await this.eventsRepository.update(
-        updatedEventEntity.dataValues,
-        {
-          where: {
-            id: eventId,
-          },
-        },
+      const updateStatus = await this.eventModel.updateOne(
+        { _id: eventId },
+        updatedEventEntity,
       );
-      if (updateStatus[0] > 0) {
+      if (updateStatus.modifiedCount > 0) {
         return updatedEventEntity;
       } else {
         throwCustomException(Message.UpdateFailed, HttpStatus.CONFLICT);
@@ -118,45 +90,60 @@ export class EventsService {
     }
   }
 
-  async remove(taskId: number, id: number) {
-    const event = await this.getEvent(taskId, id);
+  async joinNewUser(eventId: string, userId: string, ownerId: string) {
+    console.log(eventId, userId, ownerId);
+    const event = await this.eventModel.findOne({
+      ownerId,
+    });
+
     if (!event) {
       throwCustomException(
         Message.EventNotFoundOrUnAuth,
         HttpStatus.BAD_REQUEST,
       );
     }
-    const status = await this.eventsRepository.destroy<Event>({
-      where: { id: event.id },
-    });
-    if (status > 0) {
-      return event;
-    } else {
-      throwCustomException(Message.RemoveFailed, HttpStatus.CONFLICT);
-    }
-  }
-
-  async createEvent(event: CreateEventDto, userId: number): Promise<Event> {
-    const createdEvent = await this.eventsRepository.create<Event>({
-      ...event,
-      userId,
-    });
-
     try {
-      await this.eventGroupRepository.create(
-        {
-          ownerId: userId,
-          role: 'admin',
-          eventId: createdEvent.id,
-          userId,
-        },
-        { fields: ['ownerId', 'role', 'eventId', 'userId'] },
-      );
-    } catch (error) {
-      throwCustomException(Message.UnAbleToCreateEvent, HttpStatus.CONFLICT);
-    }
+      const user = await this.usersService.findWithId(userId);
+      const res = await event.updateOne({
+        $push: { users: user },
+      });
 
-    return createdEvent;
+      if (res.modifiedCount == 1) {
+        const result = await this.eventModel.findOne({
+          ownerId,
+        });
+        return result;
+      }
+    } catch (error) {
+      console.log(error);
+      throwCustomException(Message.GroupeJoining, HttpStatus.BAD_REQUEST);
+    }
   }
-*/
+
+  async removeUserFromEvent(eventId: string, ownerId: string, userId: string) {
+    const event = await this.eventModel.findOne({
+      ownerId,
+      eventId,
+    });
+
+    if (!event) {
+      throwCustomException(
+        Message.EventNotFoundOrUnAuth,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    try {
+      const res = await event.updateOne({
+        $pull: { users: userId },
+      });
+
+      const result = await this.eventModel.findOne({
+        ownerId,
+      });
+      return result;
+    } catch (error) {
+      console.log(error);
+      throwCustomException(Message.GroupeExit, HttpStatus.BAD_REQUEST);
+    }
+  }
 }

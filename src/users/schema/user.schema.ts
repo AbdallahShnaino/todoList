@@ -18,12 +18,6 @@ export class User {
 
   @Prop({ required: false })
   role: String;
-
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Event' }] })
-  events: Event[];
-
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Task' }] })
-  tasks: Task[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
