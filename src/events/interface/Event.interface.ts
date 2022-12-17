@@ -10,5 +10,5 @@ export interface Event {
   type?: string;
   startingAt: Date;
   finishedAt: Date;
-  users: User[];
+  users: [User];
 }
