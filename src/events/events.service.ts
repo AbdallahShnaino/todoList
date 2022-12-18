@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Message, throwCustomException } from 'src/errors/list.exception';
 import { User } from 'src/users/entity/user.entity';
 import { UsersService } from 'src/users/user.service';
-import { getConnection, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateEventDto } from './dtos/create-event.dto';
 import { Event } from './entity/event.entity';
 @Injectable()
@@ -46,16 +46,7 @@ export class EventsService {
     return event;
   }
 
-  async findAll(ownerId: string): Promise<Event[]> {
-    const events = getConnection()
-      .getMongoRepository(Event)
-      .find({
-        where: {
-          'owner.id = :ownerId': { ownerId },
-        },
-      });
-    return events;
-  }
+  async findAll(ownerId: string) /* : Promise<Event[]> */ {}
 
   /* 
 
