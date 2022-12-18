@@ -1,13 +1,15 @@
 import { Injectable, NotFoundException, HttpStatus } from '@nestjs/common';
 import { PasswordService } from './password.service';
 import { Message, throwCustomException } from '../errors/list.exception';
-import { User } from './interface/User.interface';
+import { User } from './entity/user.entity';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel('Users') private readonly userModel: Model<User>,
+    @InjectRepository(User) private userRepository: Repository<User>,
     private passwordService: PasswordService,
   ) {}
 
@@ -16,18 +18,21 @@ export class UsersService {
     email: string,
     password: string,
   ): Promise<User> {
-    const createdUser = new this.userModel({ fullName, email, password });
-    const user = await createdUser.save();
-    console.log(user);
+    const createdUser = this.userRepository.create({
+      fullName,
+      email,
+      password,
+    });
+    const user = this.userRepository.save(createdUser);
     return user;
   }
 
   async findAll(): Promise<User[]> {
-    return this.userModel.find().exec();
+    return this.userRepository.find();
   }
 
   async findWithEmail(email: string): Promise<User> {
-    return await this.userModel.findOne({ email });
+    return await this.userRepository.findOne({ where: { email } });
   }
 
   async findWithId(id: string): Promise<User> {
@@ -35,7 +40,7 @@ export class UsersService {
       throw new NotFoundException('user id could not be null');
     }
     try {
-      return await this.userModel.findOne({ _id: id });
+      return await this.userRepository.findOneById(id);
     } catch (error) {
       throw new NotFoundException('id not correct!');
     }
@@ -46,8 +51,8 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException('user not found!');
     }
-    const deleteResult = await this.userModel.deleteOne({ _id: id });
-    if (deleteResult.deletedCount > 0) {
+    const deleteResult = await this.userRepository.delete(user);
+    if (deleteResult.affected > 0) {
       return user;
     } else {
       throwCustomException(Message.RemoveFailed, HttpStatus.CONFLICT);
@@ -66,12 +71,9 @@ export class UsersService {
       );
     }
     try {
-      const updateStatus = await this.userModel.updateOne(
-        { _id: id },
-        updatedUserEntity,
-      );
+      const updateStatus = await this.userRepository.save(updatedUserEntity);
 
-      if (updateStatus[0] > 0) {
+      if (updateStatus) {
         return updatedUserEntity;
       } else {
         throwCustomException(Message.UpdateFailed, HttpStatus.CONFLICT);

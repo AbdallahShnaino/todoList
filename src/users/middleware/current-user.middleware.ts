@@ -1,6 +1,6 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
-import { User } from '../interface/User.interface';
+import { User } from '../entity/user.entity';
 import { UsersService } from '../user.service';
 
 declare global {

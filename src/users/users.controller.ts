@@ -10,7 +10,6 @@ import {
   Patch,
   UseGuards,
   UnauthorizedException,
-  ParseIntPipe,
 } from '@nestjs/common';
 import { CurrentUser } from 'src/decorators/current-user-decorator';
 import { AuthGard } from 'src/guards/auth.guard';
@@ -22,8 +21,8 @@ import { ShowUserDto } from './dto/show-user.dto';
 import { SignInUserDto } from './dto/signin-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { serialize } from '../interceptors/serialize-interceptors';
-import { User } from './schema/user.schema';
 import { UsersService } from './user.service';
+import { User } from './entity/user.entity';
 @Controller('users')
 @serialize(ShowUserDto)
 export class UsersController {
@@ -37,7 +36,7 @@ export class UsersController {
     @Session() session: Record<string, any>,
   ) {
     const user = await this.authService.signup(fullName, email, password);
-    session.userId = user.id;
+    session.userId = user._id;
     return user;
   }
 
@@ -47,7 +46,7 @@ export class UsersController {
     @Session() session: Record<string, any>,
   ) {
     const user = await this.authService.signin(email, password);
-    session.userId = user.id;
+    session.userId = user._id;
     return user;
   }
 

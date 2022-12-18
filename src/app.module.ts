@@ -1,18 +1,27 @@
 import { MiddlewareConsumer, Module, Scope } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
-import { TasksModule } from './tasks/tasks.module';
-import { EventsModule } from './events/events.module';
+//import { TasksModule } from './tasks/tasks.module';
+//import { EventsModule } from './events/events.module';
 import { CurrentUserMiddleware } from './users/middleware/current-user.middleware';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from './interceptors/logging.interceptor';
-import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './users/entity/user.entity';
 
 @Module({
   imports: [
+    TypeOrmModule.forRoot({
+      type: 'mongodb',
+      host: 'localhost',
+      port: 27017,
+      database: 'nest-test',
+      entities: [User],
+      synchronize: true,
+      useUnifiedTopology: true,
+    }),
     UsersModule,
-    TasksModule,
-    EventsModule,
-    MongooseModule.forRoot('mongodb://localhost/hello'),
+    //  TasksModule,
+    //   EventsModule,
   ],
   controllers: [],
   providers: [
