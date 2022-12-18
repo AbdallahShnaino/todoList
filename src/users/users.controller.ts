@@ -36,7 +36,7 @@ export class UsersController {
     @Session() session: Record<string, any>,
   ) {
     const user = await this.authService.signup(fullName, email, password);
-    session.userId = user._id;
+    session.userId = user.id;
     return user;
   }
 
@@ -46,7 +46,7 @@ export class UsersController {
     @Session() session: Record<string, any>,
   ) {
     const user = await this.authService.signin(email, password);
-    session.userId = user._id;
+    session.userId = user.id;
     return user;
   }
 

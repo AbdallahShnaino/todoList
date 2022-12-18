@@ -2,8 +2,6 @@ import { Injectable, NotFoundException, HttpStatus } from '@nestjs/common';
 import { PasswordService } from './password.service';
 import { Message, throwCustomException } from '../errors/list.exception';
 import { User } from './entity/user.entity';
-import { Model } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 @Injectable()
@@ -18,7 +16,9 @@ export class UsersService {
     email: string,
     password: string,
   ): Promise<User> {
+    var id = 'id' + Math.random().toString(16).slice(2);
     const createdUser = this.userRepository.create({
+      id,
       fullName,
       email,
       password,
@@ -40,7 +40,7 @@ export class UsersService {
       throw new NotFoundException('user id could not be null');
     }
     try {
-      return await this.userRepository.findOneById(id);
+      return await this.userRepository.findOneBy({ id });
     } catch (error) {
       throw new NotFoundException('id not correct!');
     }

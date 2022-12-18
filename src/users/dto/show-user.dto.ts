@@ -2,7 +2,7 @@ import { Expose } from 'class-transformer';
 
 export class ShowUserDto {
   @Expose()
-  id: number;
+  id: string;
 
   @Expose()
   fullName: string;
