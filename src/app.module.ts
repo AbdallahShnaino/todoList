@@ -9,7 +9,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entity/user.entity';
 import { Task } from './tasks/entity/task.entity';
 import { Event } from './events/entity/event.entity';
-
 @Module({
   imports: [
     TypeOrmModule.forRoot({

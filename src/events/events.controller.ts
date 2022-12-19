@@ -32,7 +32,6 @@ export class EventsController {
     @Session() { userId }: Record<string, any>,
   ) {
     if (!id) {
-      console.log('jo 1');
       return await this.eventsService.findAll(userId);
     }
     console.log('jo 2');

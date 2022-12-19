@@ -29,6 +29,7 @@ export class EventsService {
     ownerContainer.email = owner.email;
     ownerContainer.fullName = owner.fullName;
     event.owner = ownerContainer;
+
     await this.eventRepository.save(event);
     console.log(event);
     return event;
@@ -46,10 +47,11 @@ export class EventsService {
     return event;
   }
 
-  async findAll(ownerId: string) /* : Promise<Event[]> */ {}
+  async findAll(ownerId: string): Promise<Event[]> {
+    return this.eventRepository.find({ where: { owner: { id: ownerId } } });
+  }
 
   /* 
-
 
   async remove(eventId: string, ownerId: string) {
     const event = await this.getEvent(eventId, ownerId);
