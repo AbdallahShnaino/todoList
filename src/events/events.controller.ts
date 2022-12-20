@@ -34,13 +34,36 @@ export class EventsController {
     if (!id) {
       return await this.eventsService.findAll(userId);
     }
-    console.log('jo 2');
-    console.log('id, userId', id, userId);
     return await this.eventsService.getEvent(id, userId);
   }
 
-  /*
+  @Patch('/:id')
+  updateEvent(
+    @Param('id') eventId: string,
+    @Body() event: Partial<CreateEventDto>,
+    @Session() { userId }: Record<string, any>,
+  ) {
+    return this.eventsService.update(userId, eventId, event);
+  }
 
+  @Delete('/:id')
+  deleteEvent(
+    @Param('id') id: string,
+    @Session() { userId }: Record<string, any>,
+  ) {
+    return this.eventsService.remove(id, userId);
+  }
+
+  @Get('/all')
+  getUsersEvent(
+    @Param('id') eventId: string,
+    @Session() { userId }: Record<string, any>,
+  ) {
+    return this.eventsService.getUsersEvent(eventId, userId);
+  }
+
+  /*
+  
 
 
   @Get('/join/:eventId/:userId')
@@ -65,22 +88,6 @@ export class EventsController {
 
 
 
-  @Patch('/:id')
-  updateEvent(
-    @Param('id') taskId: string,
-    @Body() task: Partial<CreateEventDto>,
-    @Session() { userId }: Record<string, any>,
-  ) {
-    return this.eventsService.update(userId, taskId, task);
-  }
-
-  @Delete('/:id')
-  deleteEvent(
-    @Param('id') id: string,
-    @Session() { userId }: Record<string, any>,
-  ) {
-    return this.eventsService.remove(id, userId);
-  }
 
 
 

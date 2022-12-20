@@ -3,9 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Message, throwCustomException } from 'src/errors/list.exception';
 import { User } from 'src/users/entity/user.entity';
 import { UsersService } from 'src/users/user.service';
-import { Repository } from 'typeorm';
+import { Repository, FindManyOptions, FindOptionsWhere } from 'typeorm';
 import { CreateEventDto } from './dtos/create-event.dto';
 import { Event } from './entity/event.entity';
+
 @Injectable()
 export class EventsService {
   constructor(
@@ -16,7 +17,6 @@ export class EventsService {
   async createEvent(e: CreateEventDto, ownerId: string): Promise<Event> {
     const owner = await this.usersService.findWithId(ownerId);
     const event = new Event();
-    const ownerContainer = new User();
     event.description = e.description;
     event.title = e.title;
     event.id = 'id' + Math.random().toString(16).slice(2);
@@ -25,18 +25,25 @@ export class EventsService {
     event.locLatitude = e.locLatitude;
     event.locLongitude = e.locLatitude;
     event.type = e.type;
-    ownerContainer.id = owner.id;
-    ownerContainer.email = owner.email;
-    ownerContainer.fullName = owner.fullName;
-    event.owner = ownerContainer;
-
-    await this.eventRepository.save(event);
-    console.log(event);
-    return event;
+    event.owner = new User();
+    event.owner.id = owner.id;
+    event.owner.email = owner.email;
+    event.owner.fullName = owner.fullName;
+    event.users = [];
+    return await this.eventRepository.save(event);
   }
 
   async getEvent(id: string, ownerId: string): Promise<Event> {
-    const event = await this.eventRepository.findOne({ where: { id } });
+    const event = await this.eventRepository.findOne({
+      relations: {
+        owner: true,
+        users: true,
+      },
+      where: {
+        'owner.id': { $eq: ownerId },
+        id,
+      } as FindOptionsWhere<User>,
+    });
     const owner = event.owner;
     if (!event || owner.id !== ownerId) {
       throwCustomException(
@@ -48,10 +55,45 @@ export class EventsService {
   }
 
   async findAll(ownerId: string): Promise<Event[]> {
-    return this.eventRepository.find({ where: { owner: { id: ownerId } } });
+    return this.eventRepository.find({
+      relations: {
+        owner: true,
+        users: true,
+      },
+      where: {
+        'owner.id': { $eq: ownerId },
+      } as FindOptionsWhere<User>,
+    });
   }
 
-  /* 
+  async update(
+    ownerId: string,
+    eventId: string,
+    attrs: Partial<Event>,
+  ): Promise<Partial<Event>> {
+    const event = await this.getEvent(eventId, ownerId);
+    if (!event || event.owner.id !== ownerId) {
+      throw new UnauthorizedException(
+        "You don't have permission to update this Event not found!",
+      );
+    }
+    const updatedEvent = Object.assign(event, attrs);
+    try {
+      const updateStatus = await this.eventRepository.update(
+        { owner: { id: ownerId } },
+        attrs,
+      );
+      console.log(updateStatus, '0000');
+      if (updateStatus) {
+        return updatedEvent;
+      } else {
+        throwCustomException(Message.UpdateFailed, HttpStatus.CONFLICT);
+      }
+    } catch (error) {
+      console.log(error);
+      throwCustomException(Message.UpdateFailed, HttpStatus.BAD_REQUEST);
+    }
+  }
 
   async remove(eventId: string, ownerId: string) {
     const event = await this.getEvent(eventId, ownerId);
@@ -61,44 +103,26 @@ export class EventsService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const status = await this.eventModel.deleteOne({ _id: eventId });
-    if (status.deletedCount > 0) {
+    const status = await this.eventRepository.delete({ id: eventId });
+    if (status.affected > 0) {
       return event;
     } else {
       throwCustomException(Message.RemoveFailed, HttpStatus.CONFLICT);
     }
   }
 
-
-  async update(
-    id: string,
-    eventId: string,
-    attrs: Partial<Event>,
-  ): Promise<Partial<Event>> {
-    const task = await this.getEvent(eventId, id);
-    if (!task) {
-      throw new UnauthorizedException(
-        "You don't have permission to update this Event not found!",
-      );
-    }
-    const updatedEventEntity = Object.assign(task, attrs);
-
-    try {
-      const updateStatus = await this.eventModel.updateOne(
-        { _id: eventId },
-        updatedEventEntity,
-      );
-      if (updateStatus.modifiedCount > 0) {
-        return updatedEventEntity;
-      } else {
-        throwCustomException(Message.UpdateFailed, HttpStatus.CONFLICT);
-      }
-    } catch (error) {
-      throwCustomException(Message.DuplicatedEmail, HttpStatus.BAD_REQUEST);
-    }
+  async getUsersEvent(eventId: string, userId: any): Promise<User[]> {
+    const event = await this.eventRepository.findOne({
+      relations: {
+        owner: true,
+        users: true,
+      },
+      where: { id: eventId, owner: { id: userId } },
+    });
+    return event.users || [];
   }
 
-
+  /* 
 
   async joinNewUser(eventId: string, userId: string, ownerId: string) {
     console.log(eventId, userId, ownerId);
