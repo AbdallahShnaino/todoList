@@ -1,5 +1,6 @@
 import { HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { FieldOption } from 'aws-sdk/clients/connectcases';
 import { Message, throwCustomException } from 'src/errors/list.exception';
 import { User } from 'src/users/entity/user.entity';
 import { UsersService } from 'src/users/user.service';
@@ -80,10 +81,9 @@ export class EventsService {
     const updatedEvent = Object.assign(event, attrs);
     try {
       const updateStatus = await this.eventRepository.update(
-        { owner: { id: ownerId } },
+        { id: eventId, owner: { id: ownerId } },
         attrs,
       );
-      console.log(updateStatus, '0000');
       if (updateStatus) {
         return updatedEvent;
       } else {
@@ -111,48 +111,70 @@ export class EventsService {
     }
   }
 
-  async getUsersEvent(eventId: string, userId: any): Promise<User[]> {
+  async getUsersEvent(eventId: string, userId: any) {
     const event = await this.eventRepository.findOne({
       relations: {
         owner: true,
         users: true,
       },
-      where: { id: eventId, owner: { id: userId } },
+      where: {
+        id: eventId,
+      },
     });
-    return event.users || [];
+
+    if (event.owner.id === userId) {
+      return event.users;
+    }
   }
 
-  /* 
-
   async joinNewUser(eventId: string, userId: string, ownerId: string) {
-    console.log(eventId, userId, ownerId);
-    const event = await this.eventModel.findOne({
-      ownerId,
-    });
+    const event = await this.getEvent(eventId, ownerId);
 
-    if (!event) {
-      throwCustomException(
-        Message.EventNotFoundOrUnAuth,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
     try {
       const user = await this.usersService.findWithId(userId);
-      const res = await event.updateOne({
-        $push: { users: user },
-      });
+      event.users.push(user);
+      const updateStatus = await this.eventRepository.update(
+        { id: eventId, owner: { id: ownerId } },
+        event,
+      );
 
-      if (res.modifiedCount == 1) {
-        const result = await this.eventModel.findOne({
-          ownerId,
-        });
-        return result;
+      if (updateStatus.affected > 0) {
+        return event;
+      } else {
+        throwCustomException(Message.UpdateFailed, HttpStatus.CONFLICT);
       }
     } catch (error) {
       console.log(error);
       throwCustomException(Message.GroupeJoining, HttpStatus.BAD_REQUEST);
     }
   }
+
+  async removeUserFromEvent(eventId: string, userId: string, ownerId: string) {
+    const event = await this.getEvent(eventId, ownerId);
+
+    try {
+      event.users.filter((u, i) => {
+        if (u.id === userId) {
+          event.users.splice(i, 1);
+        }
+      });
+      const updateStatus = await this.eventRepository.update(
+        { id: eventId, owner: { id: ownerId } },
+        event,
+      );
+
+      if (updateStatus.affected > 0) {
+        return event;
+      } else {
+        throwCustomException(Message.UpdateFailed, HttpStatus.CONFLICT);
+      }
+    } catch (error) {
+      console.log(error);
+      throwCustomException(Message.GroupeJoining, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  /* 
 
 
 

@@ -40,7 +40,10 @@ export class UsersService {
       throw new NotFoundException('user id could not be null');
     }
     try {
-      return await this.userRepository.findOneBy({ id });
+      const user = await this.userRepository.findOneBy({ id });
+      delete user['password'];
+      delete user['_id'];
+      return user;
     } catch (error) {
       throw new NotFoundException('id not correct!');
     }

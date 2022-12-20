@@ -56,15 +56,11 @@ export class EventsController {
 
   @Get('/all')
   getUsersEvent(
-    @Param('id') eventId: string,
+    @Query('id') eventId: string,
     @Session() { userId }: Record<string, any>,
   ) {
     return this.eventsService.getUsersEvent(eventId, userId);
   }
-
-  /*
-  
-
 
   @Get('/join/:eventId/:userId')
   addUserToEvent(
@@ -81,17 +77,6 @@ export class EventsController {
     @Param('userId') userId: string,
     @Session() { userId: ownerId }: Record<string, any>,
   ) {
-    return this.eventsService.removeUserFromEvent(eventId, ownerId, userId);
+    return this.eventsService.removeUserFromEvent(eventId, userId, ownerId);
   }
-
-
-
-
-
-
-
-
-
-
-*/
 }
